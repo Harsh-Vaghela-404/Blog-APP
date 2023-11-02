@@ -14,16 +14,16 @@ const client = new Client({
 export async function connectDb() {
   try {
     await client.connect();
-    await createTable();
+    // await createTable();
     console.log('Connected to PostgreSQL database');
   } catch (err) {
     console.error('Error connecting to PostgreSQL database:', err);
   }
 }
 
-export async function queryDb(query: string) {
+export async function queryDb(query: string, values:any) {
   try {
-    const result = await client.query(query);
+    const result = await client.query(query, values);
     return result.rows;
   } catch (err) {
     console.error('Error executing query:', err);
@@ -40,7 +40,7 @@ async function createTable() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );`
-  await queryDb(USER_SQL)
+  await queryDb(USER_SQL,[])
   const POST_SQL = `CREATE TABLE IF NOT EXISTS post(
     id SERIAL PRIMARY KEY,
     title VARCHAR(50) NOT NULL,
@@ -49,7 +49,7 @@ async function createTable() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
   `
-  await queryDb(POST_SQL)
+  await queryDb(POST_SQL,[])
   const PostComment_SQL = `CREATE TABLE IF NOT EXISTS post_comment(
     id SERIAL PRIMARY KEY,
     post_id INT REFERENCES post(id) NOT NULL,
@@ -57,5 +57,5 @@ async function createTable() {
     content Text NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`
-    await queryDb(PostComment_SQL)
+    await queryDb(PostComment_SQL,[])
 }
