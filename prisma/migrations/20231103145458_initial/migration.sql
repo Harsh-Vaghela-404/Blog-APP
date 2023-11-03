@@ -1,9 +1,22 @@
 -- CreateTable
+CREATE TABLE "bloguser" (
+    "id" SERIAL NOT NULL,
+    "username" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "token" TEXT,
+
+    CONSTRAINT "bloguser_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "post" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "author_id" TEXT NOT NULL,
+    "author_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -12,9 +25,9 @@ CREATE TABLE "post" (
 
 -- CreateTable
 CREATE TABLE "post_comment" (
-    "id" TEXT NOT NULL,
-    "post_id" TEXT NOT NULL,
-    "author_id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "post_id" INTEGER NOT NULL,
+    "author_id" INTEGER NOT NULL,
     "content" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL,

@@ -10,12 +10,15 @@ const handlers_1 = __importDefault(require("./handlers/handlers"));
 const connections_1 = require("./connections");
 //Dotenv Config
 (0, dotenv_1.config)();
+//Database connection to the local
 (0, connections_1.connectDb)();
+//graphql api
 const app = (0, express_1.default)();
-app.use("/graphql", (0, express_graphql_1.graphqlHTTP)({
+app.use("/blogpost", (0, express_graphql_1.graphqlHTTP)({
     schema: handlers_1.default,
     graphiql: true
 }));
+//Express server
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
 });
