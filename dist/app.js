@@ -7,8 +7,10 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = require("dotenv");
 const express_graphql_1 = require("express-graphql");
 const handlers_1 = __importDefault(require("./handlers/handlers"));
+const connections_1 = require("./connections");
 //Dotenv Config
 (0, dotenv_1.config)();
+(0, connections_1.connectDb)();
 const app = (0, express_1.default)();
 app.use("/graphql", (0, express_graphql_1.graphqlHTTP)({
     schema: handlers_1.default,

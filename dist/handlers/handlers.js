@@ -1,10 +1,27 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const graphql_1 = require("graphql");
 const schema_1 = require("../schema/schema");
 const client_1 = require("@prisma/client");
 const bcryptjs_1 = require("bcryptjs");
 const prisma = new client_1.PrismaClient(); // Initialize the Prisma Client
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken")); // Import the jsonwebtoken library for JWT token handling
+const generateToken = (user) => {
+    return jsonwebtoken_1.default.sign(user, "randomString", { expiresIn: 10000 });
+};
+// Verify JWT token
+const verifyToken = (token) => {
+    // try {
+    console.log(token);
+    let verify = jsonwebtoken_1.default.verify(token, "randomString");
+    return verify;
+    // } catch (error) {
+    //     throw new Error('Invalid or expired token.');
+    // }
+};
 const RootQuery = new graphql_1.GraphQLObjectType({
     name: "RootQueryType",
     fields: {
@@ -58,6 +75,7 @@ const mutations = new graphql_1.GraphQLObjectType({
                             updated_at: currentDate
                         }
                     });
+                    newUser.token = generateToken(newUser);
                     return newUser;
                 }
                 catch (error) {
@@ -83,6 +101,7 @@ const mutations = new graphql_1.GraphQLObjectType({
                     if (!decrypted_pass) {
                         throw new Error(" Invalid password for " + args.email + "");
                     }
+                    is_blog_user.token = generateToken(is_blog_user);
                     return is_blog_user;
                 }
                 catch (error) {
@@ -98,8 +117,14 @@ const mutations = new graphql_1.GraphQLObjectType({
                 content: { type: (0, graphql_1.GraphQLNonNull)(graphql_1.GraphQLString) },
                 author_id: { type: (0, graphql_1.GraphQLNonNull)(graphql_1.GraphQLInt) }
             },
-            async resolve(parent, args) {
+            async resolve(parent, args, context) {
                 try {
+                    const { authorization } = context.headers;
+                    // console.log( context.headers);
+                    const user = verifyToken(authorization);
+                    if (!user) {
+                        throw new Error('Invalid or expired token.');
+                    }
                     let is_blog_user = await check_user('', args.author_id);
                     if (!is_blog_user) {
                         throw new Error(" You are not authorized to add blog ");
@@ -130,8 +155,13 @@ const mutations = new graphql_1.GraphQLObjectType({
                 content: { type: graphql_1.GraphQLString },
                 author_id: { type: (0, graphql_1.GraphQLNonNull)(graphql_1.GraphQLInt) }
             },
-            async resolve(parent, args) {
+            async resolve(parent, args, context) {
                 try {
+                    const { authorization } = context.headers;
+                    const user = verifyToken(authorization);
+                    if (!user) {
+                        throw new Error('Invalid or expired token.');
+                    }
                     let is_blog_user = await prisma.post.findFirst({
                         where: {
                             author_id: args.author_id,
@@ -166,8 +196,13 @@ const mutations = new graphql_1.GraphQLObjectType({
                 id: { type: (0, graphql_1.GraphQLNonNull)(graphql_1.GraphQLInt) },
                 author_id: { type: (0, graphql_1.GraphQLNonNull)(graphql_1.GraphQLInt) }
             },
-            async resolve(parent, args) {
+            async resolve(parent, args, context) {
                 try {
+                    const { authorization } = context.headers;
+                    const user = verifyToken(authorization);
+                    if (!user) {
+                        throw new Error('Invalid or expired token.');
+                    }
                     let is_authorized = await prisma.post.findFirst({
                         where: {
                             author_id: args.author_id,
@@ -202,8 +237,13 @@ const mutations = new graphql_1.GraphQLObjectType({
                 author_id: { type: (0, graphql_1.GraphQLNonNull)(graphql_1.GraphQLInt) },
                 content: { type: (0, graphql_1.GraphQLNonNull)(graphql_1.GraphQLString) }
             },
-            async resolve(parent, args) {
+            async resolve(parent, args, context) {
                 try {
+                    const { authorization } = context.headers;
+                    const user = verifyToken(authorization);
+                    if (!user) {
+                        throw new Error('Invalid or expired token.');
+                    }
                     let is_post_exist = await prisma.post.findFirst({
                         where: {
                             id: args.post_id
@@ -243,7 +283,6 @@ async function check_user(email = '', id = 0) {
             ...(email ? { email } : {})
         }
     });
-    console.log(is_user_exsist);
     return is_user_exsist;
 }
 exports.default = new graphql_1.GraphQLSchema({ query: RootQuery, mutation: mutations });

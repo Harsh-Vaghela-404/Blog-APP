@@ -19,7 +19,7 @@ model bloguser{
   updated_at DateTime @map("updated_at")
   posts post[]
   post_comments post_comment[]
-
+  token String?
   @@map("bloguser")
 }
 

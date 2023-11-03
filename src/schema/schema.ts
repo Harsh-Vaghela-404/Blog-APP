@@ -3,7 +3,11 @@ import { PrismaClient } from "@prisma/client";
 // import { hashSync } from "bcryptjs";
 
 const prisma = new PrismaClient();
+import jwt from 'jsonwebtoken';
 
+const generateToken = (user) => {
+  return jwt.sign({ userId: user.id }, 'your-secret-key', { expiresIn: '7 days' });
+};
 
 export const BlogUserType = new GraphQLObjectType({
     name: 'BlogUserType',
@@ -24,6 +28,10 @@ export const BlogUserType = new GraphQLObjectType({
                 }
               });
             }
+        },
+        token: {
+          type: GraphQLString,
+          resolve: (parent) => generateToken(parent), // Generate the token
         },
         postComments: {
             type: GraphQLList(PostCommentType),

@@ -1,10 +1,17 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostCommentType = exports.PostType = exports.BlogUserType = void 0;
 const graphql_1 = require("graphql");
 const client_1 = require("@prisma/client");
 // import { hashSync } from "bcryptjs";
 const prisma = new client_1.PrismaClient();
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const generateToken = (user) => {
+    return jsonwebtoken_1.default.sign({ userId: user.id }, 'your-secret-key', { expiresIn: '7 days' });
+};
 exports.BlogUserType = new graphql_1.GraphQLObjectType({
     name: 'BlogUserType',
     fields: () => ({
@@ -24,6 +31,10 @@ exports.BlogUserType = new graphql_1.GraphQLObjectType({
                     }
                 });
             }
+        },
+        token: {
+            type: graphql_1.GraphQLString,
+            resolve: (parent) => generateToken(parent), // Generate the token
         },
         postComments: {
             type: (0, graphql_1.GraphQLList)(exports.PostCommentType),
